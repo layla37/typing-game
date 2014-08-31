@@ -1,83 +1,84 @@
-// wrapped in self-invoking function to avoid global variables
 (function(){
-	var points = 0;
-	var timerLetters;
-	var letterSpeed = 1000;
+	let points = 0;
+	let timerLetters;
+	let letterDisplayInterval = 400;
+	const startButton = document.getElementById('startButton');
+
+	const mainDiv = document.getElementById('main');
 
 	// create random letter
-	var randLetter = function(){
-		var randNum = Math.floor((Math.random() * 26));
-		var letter = String.fromCharCode(65+randNum).toLowerCase();
+	const randLetter = function() {
+		const randNum = Math.floor((Math.random() * 26));
+		const letter = String.fromCharCode(65+randNum).toLowerCase();
 		return letter;
 	};
 
-	var appendNewLetter = function(){
-		// If the oldest letter reaches the far right of the container, end the game
-		if (($("#main").width() === $("#container").width()) && ($("#main").width() > "300")){
+	const appendNewLetter = function() {
+		const container = document.getElementById('container');
+		const mainDivWidth = mainDiv.clientWidth;
+		// if the oldest letter reaches the far right of the container, end the game
+		if (mainDivWidth === container.clientWidth && mainDivWidth > '300') {
 			endGame();
+			return;
 		}
-
 		// use randLetter to generate a new random letter
-		x = randLetter();
-		// create a new div with the class equal to the letter, and inner HTML equal to the letter
-		d = $("<div></div>").addClass(x).addClass("letterDiv");
-		d.html(x);
+		const letter = randLetter();
+		// create a new div with the class equal to the letter, and innerText equal to the letter
+		const newDiv = document.createElement('div');
+		newDiv.className = 'letterDiv ' + letter;
+		newDiv.innerText = letter;
 		// append the new div to the #main div
-		$("#main").prepend(d);
+		mainDiv.appendChild(newDiv);
 	};
 
 	// shift all letters to the right by 10px
-	var shiftLetters = function(){
-		$(".letterDiv").first().css({"marginLeft":"10px"});
+	const shiftLetters = function() {
+		const letterDiv = document.getElementsByClassName('letterDiv');
+
+		if (letterDiv.length > 0) {
+			letterDiv[0].style.marginLeft = '10px';
+		}
 	};
 
-	var deleteLetter = function(key){
-		var letterClass = "." + key;
-		if (!$(letterClass).hasClass(key)){
+	const deleteLetter = function(key) {
+		let letterClass = document.getElementsByClassName(key);
+    console.log(letterClass);
+		if (letterClass.length === 0) {
 			points -= 1;
 		}
-		else{
-			$(letterClass).last().remove();
+		else {
+			letterClass[0].remove();
 			points += 1;
-		}	
-		$("#totalPoints").html(points);
+		}
 
-		if (points % 20 === 0){
+		document.getElementById('totalPoints').innerText = points;
+		// spped up the rate of letters appearing after every additonal 10 points received
+		if (points !== 0 && points % 10 === 0) {
 			clearInterval(timerLetters);
-			letterSpeed *= 1.1;
-			timerLetters = setInterval(appendNewLetter, letterSpeed);
+			letterDisplayInterval *= .8;
+			timerLetters = setInterval(appendNewLetter, letterDisplayInterval);
 		}
 	}
 
-	var endGame = function(){
+	const endGame = function() {
 		clearInterval(timerLetters);
-		$(".letterDiv").remove();
-		$("#main").hide();
-		alert("Game Over! Total Points: " + points);
+		mainDiv.style.display = 'none';
+		alert('Game Over! Total Points: ' + points);
 		location.reload();
 	};
 
-
-	$(document).ready(function(){
-		
-		$(document).on("keydown", function(e) {
-		    var key = String.fromCharCode(e.keyCode).toLowerCase();
-		    console.log(key);
-		    	if (e.keyCode === 27){
-					endGame();
-				}
-		    deleteLetter(key);                   
-		});	
-
-		$("#startButton").click(function(){	
-			// create and append new random letter to #main	
-			timerLetters = setInterval(appendNewLetter, letterSpeed);
-
-			// every 100 milliseconds, shift all letters to the right
-			var timerShiftLetters = setInterval(shiftLetters, 100);
-		});
-
+	document.addEventListener('keydown', function(e) {
+		if (e.key === 'Escape') {
+			endGame();
+			return;
+		}
+		deleteLetter(e.key);
 	});
 
+	startButton.addEventListener('click', function() {
+		// create and append new random letter to #main
+		timerLetters = setInterval(appendNewLetter, letterDisplayInterval);
+		// every 100 milliseconds, shift all letters to the right
+		setInterval(shiftLetters, 100);
+	});
 }());
-

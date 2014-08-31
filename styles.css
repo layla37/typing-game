@@ -59,8 +59,8 @@ body{
 }
 
 #startButton:hover {
-    background: #C20000;
-    outline: none;
+  background: #C20000;
+  outline: none;
 }
 
 #guide{
@@ -71,5 +71,3 @@ body{
  	padding-left: 20px;
  	width: 400px;
 }
-
-
